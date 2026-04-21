@@ -20,3 +20,9 @@ const $distanceRange = document.querySelector('#distance');
 
 // délenche la gestion de fermetures des boxes
 boxClose()
+
+document.addEventListener('DOMContentLoaded', () => {
+  const mapBox = document.getElementById('map');
+  const geo = new Geo(mapBox);
+  geo.init();
+});
