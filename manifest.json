@@ -1,17 +1,23 @@
 {
-  "name": "Tec On Me",
+  "name": "Tec on Me",
   "short_name": "TecOnMe",
-  "description": "Tec On Me est une application de tracage des bus de la TEC en Belgique. Elle permet de suivre en temps réel les bus, de consulter les horaires et de recevoir des notifications en cas de perturbations.",
-  "start_url": "/index.html",
+  "description": "Application pour trouver les arrêts de bus TEC autour de vous.",
+  "start_url": "/carte.html",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#ffffff",
-  "lang": "fr",
+  "orientation": "portrait",
+  "background_color": "#FFFFFF",
+  "theme_color": "#B12A34",
   "icons": [
     {
-      "src": "/icons/favicon-16x16.png",
-      "sizes": "16x16",
+      "src": "/icons/favicon-256x256.png",
+      "sizes": "256x256",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/favicon-96x96.png",
+      "sizes": "96x96",
       "type": "image/png",
       "purpose": "any"
     },
@@ -20,12 +26,10 @@
       "sizes": "32x32",
       "type": "image/png",
       "purpose": "any"
-    },
-    {
-      "src": "/icons/favicon-256x256.png",
-      "sizes": "256x256",
-      "type": "image/png",
-      "purpose": "any"
     }
+  ],
+  "screenshots": [
+    { "src": "/icons/screenshot.png", "sizes": "1024x512", "type": "image/png" },
+    { "src": "/icons/screenshot-mobile.png", "sizes": "540x960", "type": "image/png" }
   ]
 }
