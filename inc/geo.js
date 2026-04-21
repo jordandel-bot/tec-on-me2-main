@@ -19,15 +19,15 @@ class Geo {
     constructor($mapBox) {
         // L'adresse de notre serveur qui contient les données des lignes de bus
         this.urlApi = 'https://cepegra-frontend.xyz/bootcamp';
-        
+
         // Références aux éléments HTML (la div de la carte et le bouton)
         this.$mapBox = $mapBox;
-        
+
         // État de l'application : on stocke la carte et la distance de recherche
         this.map = null;          // Contiendra l'objet Leaflet une fois créé
         this.distance = 1;        // Rayon de recherche par défaut (1km)
         this.lastPosition = null; // Stocke les dernières coordonnées pour les calculs
-        
+
         // --- LES CALQUES (LAYER GROUPS) ---
         // On crée des "tiroirs" pour ranger nos éléments.
         // Cela permet de vider un tiroir (ex: les arrêts) sans effacer la carte elle-même.
@@ -44,12 +44,12 @@ class Geo {
         document.addEventListener('click', (e) => {
             // On vérifie si l'élément cliqué (ou l'un de ses parents) est un lien de bus
             const busLink = e.target.closest('.bus-link');
-            
+
             if (busLink) {
                 e.preventDefault();
                 console.log("Chargement de la ligne :", busLink.dataset.shape);
                 this.drawRoute(busLink.dataset.shape);
-                
+
                 // Optionnel : On peut fermer le panneau quand on clique sur une ligne
                 // document.querySelector('#info-panel').classList.add('hidden');
             }
@@ -57,7 +57,7 @@ class Geo {
 
         // Options pour la précision du GPS
         this.optionsMap = { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 };
-        
+
         // On lance la préparation des images des marqueurs
         this._initIcons();
     }
@@ -89,7 +89,7 @@ class Geo {
         try {
             // On vérifie si l'utilisateur a déjà donné sa permission
             const result = await navigator.permissions.query({ name: 'geolocation' });
-            
+
             if (result.state === 'granted' || result.state === 'prompt') {
                 // Si autorisé, on demande la position précise au navigateur
                 navigator.geolocation.getCurrentPosition(
@@ -144,6 +144,7 @@ class Geo {
         // On active nos "tiroirs" (calques) sur la carte
         this.layers.stops.addTo(this.map);
         this.layers.route.addTo(this.map);
+        this.layers.walking.addTo(this.map);
 
         // Marqueur fixe pour notre position initiale
         L.marker([latitude, longitude], { icon: this.icons.user }).addTo(this.map);
@@ -180,16 +181,16 @@ class Geo {
      */
     async loadStops(position, showClickMarker = false) {
         this.lastPosition = position; // Sauvegarde pour les calculs d'itinéraires piétons
-        
+
         // Nettoyage avant de charger de nouveaux points
         this.layers.stops.clearLayers();
-        
+
         const { latitude, longitude } = position.coords;
 
         try {
             // URL complexe qui demande : "donne moi les arrêts dans un rayon de X km autour de ce point"
             const url = `https://www.odwb.be/api/explore/v2.1/catalog/datasets/le-tec-arrets-bus/records?limit=100&where=within_distance(coordinates, geom'POINT(${longitude} ${latitude})', ${this.distance}km)&order_by=distance(coordinates, geom'POINT(${longitude} ${latitude})')`;
-            
+
             const response = await fetch(url);
             const data = await response.json();
 
@@ -210,60 +211,75 @@ class Geo {
      * Crée physiquement les icônes d'arrêts et gère le contenu de la bulle d'info.
      */
     _renderStopMarker(stop) {
-    const stopPos = L.latLng(stop.coordinates.lat, stop.coordinates.lon);
-    const userPos = L.latLng(this.lastPosition.coords.latitude, this.lastPosition.coords.longitude);
-    const distance = userPos.distanceTo(stopPos);
-    const distText = distance > 1000 ? (distance / 1000).toFixed(1) + " km" : Math.round(distance) + " m";
+        const stopPos = L.latLng(stop.coordinates.lat, stop.coordinates.lon);
+        const userPos = L.latLng(this.lastPosition.coords.latitude, this.lastPosition.coords.longitude);
+        const distance = userPos.distanceTo(stopPos);
+        const distText = distance > 1000 ? (distance / 1000).toFixed(1) + " km" : Math.round(distance) + " m";
 
-    const marker = L.marker([stop.coordinates.lat, stop.coordinates.lon], { icon: this.icons.stop })
-        .addTo(this.layers.stops);
+        const marker = L.marker([stop.coordinates.lat, stop.coordinates.lon], { icon: this.icons.stop })
+            .addTo(this.layers.stops);
 
-    marker.on('click', async () => {
-        // Si un autre marqueur était actif, on lui retire la classe
-        if (this.activeMarker && this.activeMarker._icon) {
-            this.activeMarker._icon.classList.remove('marker-active');
-        }
+        marker.on('click', async () => {
+            // Si un autre marqueur était actif, on lui retire la classe
+            if (this.activeMarker && this.activeMarker._icon) {
+                this.activeMarker._icon.classList.remove('marker-active');
+            }
 
-        // On ajoute la classe au marqueur actuel
-        marker._icon.classList.add('marker-active');
-        
-        // On mémorise que c'est lui le nouveau "chef"
-        this.activeMarker = marker;
-        // 1. Récupération des bus qui passent par l'arrêt (via notre API)
-        const response = await fetch(`${this.urlApi}/bus/${stop.stop_name}/${stop.coordinates.lon}`);
-        const data = await response.json();
-        
-        let busHtml = "";
-        if (data.code === "ok") {
-            data.content.forEach(bus => {
-                if (bus.route_id) {
-                    busHtml += `<a href="#" class="bus-link" data-shape="${bus.shape_id}">${bus.route_short_name} - ${bus.route_long_name}</a><br>`;
-                }
-            });
-        }
+            // On ajoute la classe au marqueur actuel
+            marker._icon.classList.add('marker-active');
 
-        // 2. Préparation du contenu du panneau
-        const $panel = document.querySelector('#info-panel');
-        $panel.innerHTML = `
+            // On mémorise que c'est lui le nouveau "chef"
+            this.activeMarker = marker;
+            // 1. Récupération des bus qui passent par l'arrêt (via notre API)
+            const response = await fetch(`${this.urlApi}/bus/${stop.stop_name}/${stop.coordinates.lon}`);
+            const data = await response.json();
+
+            let busHtml = "";
+            if (data.code === "ok") {
+                data.content.forEach(bus => {
+                    if (bus.route_id) {
+                        busHtml += `<a href="#" class="bus-link" data-shape="${bus.shape_id}">${bus.route_short_name} - ${bus.route_long_name}</a><br>`;
+                    }
+                });
+            }
+
+            // 2. Préparation du contenu du panneau
+            const $panel = document.querySelector('#info-panel');
+            $panel.innerHTML = `
             <span class="close-panel">&times;</span>
-            <h4>${stop.stop_name}</h4>
+
+            <h3>${stop.stop_name}</h3>
+
             <hr>
+
             <div class="bus-list">${busHtml}</div>
-        `;
 
-        // 3. Affichage (en retirant la classe hidden)
-        $panel.classList.remove('hidden');
+            <button class="walk-btn">🚶‍♂️ Y aller</button>
 
-        // 4. Gestion de la fermeture
-        $panel.querySelector('.close-panel').addEventListener('click', () => {
-            $panel.classList.add('hidden');
-            this.layers.walking.clearLayers(); // On efface le tracé bleu aussi
+            <div id="walk-info"></div>`;
+
+
+
+
+
+            // 3. Affichage (en retirant la classe hidden)
+            $panel.classList.remove('hidden');
+            $panel.querySelector('.walk-btn').addEventListener('click', () => {
+                this.drawWalkingRoute(stop);
+                $panel.classList.add('hidden'); // ← ferme le panneau
+            });
+
+
+            // 4. Gestion de la fermeture
+            $panel.querySelector('.close-panel').addEventListener('click', () => {
+                $panel.classList.add('hidden');
+                this.layers.walking.clearLayers(); // On efface le tracé bleu aussi
+            });
         });
-    });
-}
+    }
 
 
-    
+
     // Trace le parcours complet d'une ligne de bus (depuis notre API)
     async drawRoute(shapeId) {
         this.layers.route.clearLayers(); // On efface le trajet précédent
@@ -271,15 +287,16 @@ class Geo {
         try {
             //requête à notre API pour récupérer les points de la ligne de bus
             const response = await fetch(`${this.urlApi}/shapes/${shapeId}`);
+
             const data = await response.json();
 
             if (data.content && data.content.length > 0) {
                 // Transformation des points API en coordonnées Leaflet
                 const points = data.content.map(p => [p.shape_pt_lat, p.shape_pt_lon]);
-                
+
                 // Dessin de la ligne rouge
                 L.polyline(points, { color: 'red', weight: 8, opacity: 0.7 }).addTo(this.layers.route);
-                
+
                 // Icônes de départ et d'arrivée du bus
                 L.marker(points[0], { icon: this.icons.start }).bindPopup('Départ du bus').addTo(this.layers.route);
                 L.marker(points[points.length - 1], { icon: this.icons.end }).bindPopup('Terminus').addTo(this.layers.route);
@@ -291,8 +308,77 @@ class Geo {
             console.error("Erreur lors du tracé du trajet :", error);
         }
     }
+    async drawWalkingRoute(stop) {
+        this.layers.walking.clearLayers();
 
-   
+        const infoBox = document.querySelector('#walk-info');
+        infoBox.innerHTML =
+            `<strong>Distance :</strong> ${distanceKm} km<br>
+            <strong>Durée :</strong> ${durationMin} min`;
+
+        const userLat = this.lastPosition.coords.latitude;
+        const userLng = this.lastPosition.coords.longitude;
+
+        const stopLat = stop.coordinates.lat;
+        const stopLng = stop.coordinates.lon;
+
+        const url = `https://router.project-osrm.org/route/v1/foot/${userLng},${userLat};${stopLng},${stopLat}?overview=full&geometries=geojson`;
+
+        const response = await fetch(url);
+        const data = await response.json();
+
+        const coords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
+
+        L.polyline(coords, { color: 'blue', weight: 5 }).addTo(this.layers.walking);
+
+        this.map.fitBounds(coords);
+    }
+    async drawWalkingRoute(stop) {
+        this.layers.walking.clearLayers();
+
+        const userLat = this.lastPosition.coords.latitude;
+        const userLng = this.lastPosition.coords.longitude;
+
+        const stopLat = stop.coordinates.lat;
+        const stopLng = stop.coordinates.lon;
+
+        const url = `https://router.project-osrm.org/route/v1/foot/${userLng},${userLat};${stopLng},${stopLat}?overview=full&geometries=geojson&steps=true`;
+
+        const response = await fetch(url);
+        const data = await response.json();
+
+        const route = data.routes[0];
+
+        // --- Distance & durée ---
+        const distanceMeters = route.distance;
+        const durationSeconds = route.duration;
+
+        const distanceKm = (distanceMeters / 1000).toFixed(2);
+        const durationMin = Math.round(durationSeconds / 60);
+
+        // --- Affichage dans le panneau ---
+        const infoBox = document.querySelector('#walk-info');
+        if (infoBox) {
+            infoBox.innerHTML = `
+            <strong>Distance :</strong> ${distanceKm} km<br>
+            <strong>Durée :</strong> ${durationMin} min
+        `;
+        }
+
+        // --- Tracé sur la carte ---
+        const coords = route.geometry.coordinates.map(c => [c[1], c[0]]);
+
+        L.polyline(coords, {
+            color: '#0078ff',
+            weight: 6,
+            opacity: 0.85,
+            lineJoin: 'round'
+        }).addTo(this.layers.walking);
+
+        this.map.fitBounds(coords);
+    }
+
 }
+
 
 export { Geo };

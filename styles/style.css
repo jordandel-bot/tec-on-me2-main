@@ -4,3 +4,91 @@
 @import "home.css";
 /* Import CSS pour la carte */
 @import "map.css";
+
+/* PAGE ENTIÈRE */
+.page {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* CARTE */
+#map {
+    width: 100%;
+    height: 100%;
+}
+
+/* SLIDER */
+.distance-control {
+    position: absolute;
+    bottom: 20px;   /* ← en bas */
+    right: 20px;    /* ← à droite */
+
+    background: rgba(255,255,255,0.9);
+    padding: 10px 14px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+
+    z-index: 1000;
+}
+
+
+/* PANNEAU D’INFO */
+.info-panel {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+
+    background: white;
+    padding: 1.2rem;
+    border-radius: 18px 18px 0 0;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.2);
+
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+
+    z-index: 1000;
+}
+
+.info-panel {
+    max-height: 35vh; /* Le panneau ne peut jamais dépasser 45% de l’écran */
+    overflow-y: auto; /* Si trop de contenu, scroll interne */
+}
+
+.info-panel:not(.hidden) {
+    transform: translateY(0);
+}
+
+.close-panel {
+    float: right;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+/* BOUTON Y ALLER */
+.walk-btn {
+    width: 100%;
+    padding: 0.9rem;
+    background: #0078ff;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-top: 1rem;
+}
+
+.walk-btn:hover {
+    background: #005fcc;
+}
+
+/* INFO DISTANCE / DURÉE */
+#walk-info {
+    margin-top: 1rem;
+    padding: 0.8rem;
+    background: #eef5ff;
+    border-radius: 8px;
+    font-size: 0.95rem;
+}
