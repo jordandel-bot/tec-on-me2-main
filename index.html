@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tec on Me !</title>
+    <title>Tec on Me</title>
     <link rel="icon" href="/icons/favicon.ico" />
     <meta name="theme-color" content="#B12A34" />
     <meta name="apple-mobile-web-app-status-bar-style" content="#B12A34" />
@@ -13,39 +13,39 @@
       integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
       crossorigin=""
     ></script>
-    <script defer type="module" src="main.js"></script>
-    <script src="install.js" defer></script>
-    <link rel="manifest" href="/manifest.json" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="yes" />
     <link rel="stylesheet" href="styles/style.css" />
   </head>
+  <body>
+    <main>
+      <div class="wrapper">
+        <form action="carte.html" class="gps gps_form">
+          <img
+            class="big"
+            src="https://assets.codepen.io/87353/icon-bus-front-big.svg"
+            alt=""
+          />
+          <h1><strong>Choisir </strong><span>mon expérience :</span></h1>
+          <div class="gps_form__field">
+            <input type="radio" name="localisation" id="gps-on" value="y" />
+            <label for="gps-on">Activer la géolocalisation</label>
+            <p>
+              <span>Et trouver les arrêts </span
+              ><span>proches de ma position.</span>
+            </p>
+            <img src="icons/geo-gps-on.svg" alt="gps actif" />
+          </div>
 
-<body>
-        <main>
-            <div class="page">
-                <div class="box box-install backface-hidden">
-                    <span class="cross close">×</span>
-                    <div class="box-content">
-                        <p>Simplifie-toi la vie,<br /><strong>Installe l'app !</strong></p>
-                        <div class="">
-                            <button class="install-btn">Installer</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="box box-alert hidden">
-                    <span class="cross close">×</span>
-                    <img src="" alt="" />
-                    <p class="alert-message">
-                        <strong>Pas d'arrêt autour de vous</strong> Déplacez-vous !!
-                    </p>
-                </div>
-                <div id="info-panel" class="info-panel hidden"></div>
-                    <!-- Controle du rayon de recherche (distance en km) -->
-                    <div class="distance-control" style="position: absolute; z-index:10000; left:1rem; top:1rem; background: rgba(255,255,255,0.95); padding:0.5rem 0.75rem; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.12);">
-                        <label style="font-size:0.9rem; display:block;">marche plus : <span id="distance-value">1 km</span></label>
-                        <input id="distance" type="range" min="0.2" max="5" step="0.1" value="1" />
-                    </div>
-                    <div id="map"></div>
-            </div>
-        </main>
+          <div class="gps_form__field">
+            <input type="radio" name="localisation" id="gps-off" value="n" />
+            <label for="gps-off"
+              ><span>Utiliser l'adresse</span><span> par défaut</span></label
+            >
+            <p>L'adresse par défaut est utilisée pour me situer.</p>
+            <img src="icons/geo-gps-off.svg" alt="gps actif" />
+          </div>
+          <button type="submit">Continuer</button>
+        </form>
+      </div>
+    </main>
+  </body>
 </html>

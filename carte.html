@@ -14,28 +14,91 @@
       integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
       crossorigin=""
     ></script>
-    <script type="module" src="main.js" defer></script>
+    <script defer type="module" src="main.js"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:slnt,wght@-10..0,100..900&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="styles/style.css" />
   </head>
   <body>
-    <div class="page">
-
-        <!-- Slider distance -->
-        <div class="distance-control">
-            <label for="distance">marche plus :</label>
-            <input type="range" id="distance" min="0.5" max="5" step="0.1">
-            <span id="distance-value"></span>
+    <main>
+      <div class="page">
+        <div class="box box-install backface-hidden">
+          <span class="cross close">×</span>
+          <div class="box-content">
+            <p>Simplifie-toi la vie,<br /><strong>Installe l'app !</strong></p>
+            <div class="">
+              <button class="install-btn">Installer</button>
+            </div>
+          </div>
         </div>
-
-        <!-- Carte -->
-        <div id="map"></div>
-
-        <!-- Panneau d'information -->
+        <div class="box box-alert hidden">
+          <span class="cross close">×</span>
+          <img src="" alt="" />
+          <p class="alert-message">
+            <strong>Pas d'arrêt autour de vous</strong> Déplacez-vous !!
+          </p>
+        </div>
         <div id="info-panel" class="info-panel hidden"></div>
+        <!-- Controle du rayon de recherche (distance en km) -->
+        <div
+          class="distance-control"
+          style="
+            background: rgba(255, 255, 255, 0.95);
+            padding: 0.5rem 0.75rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+            z-index: 10000;
+          "
+        >
+          <label style="font-size: 0.9rem; display: block"
+            >Rayon : <span id="distance-value">1 km</span></label
+          >
+          <input
+            id="distance"
+            type="range"
+            min="0.2"
+            max="5"
+            step="0.1"
+            value="1"
+          />
+        </div>
+        <!-- Bouton favoris -->
+        <button id="favorites-toggle" class="geo-btn2" title="Favoris">
+          ★
+        </button>
 
-    </div>
-
-
+        <!-- Panneau des favoris -->
+        <div
+          id="favorites-panel"
+          class="box hidden"
+          style="width: 300px; left: auto; right: 1rem; top: 4rem"
+        >
+          <span class="cross close">×</span>
+          <div class="box-content" style="display: block">
+            <h4>Mes favoris</h4>
+            <div
+              id="favorites-list"
+              style="max-height: 300px; overflow: auto; margin-top: 8px"
+            ></div>
+            <hr />
+            <label style="font-size: 0.9rem">Ajouter par shape id :</label>
+            <input
+              id="fav-shape-id"
+              placeholder="shape_id"
+              style="width: 100%; box-sizing: border-box; margin-top: 6px"
+            />
+            <input
+              id="fav-shape-name"
+              placeholder="Nom (ex: 12 - Centre)"
+              style="width: 100%; box-sizing: border-box; margin-top: 6px"
+            />
+            <button id="fav-add-btn" style="margin-top: 8px">Ajouter</button>
+          </div>
+        </div>
+        <div id="map"></div>
+      </div>
     </main>
   </body>
 </html>
